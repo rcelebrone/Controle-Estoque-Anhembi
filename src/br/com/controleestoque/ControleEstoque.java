@@ -8,6 +8,9 @@
 
 package br.com.controleestoque;
 
+import static java.lang.System.in;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 /**
  *
@@ -21,36 +24,76 @@ public class ControleEstoque {
         DataBase storage = new DataBase();
         int menuPrograma = 0;
 
-        while(menuPrograma != 5){
-            Label("////////////////////Escolha uma opção////////////////////////");
-            Label("1. Inserir novo Produto");
-            Label("2. Listar dados dos Produto");
-            Label("3. Remover Produto");
-            Label("4. Sair da aplicação");
-            Label("////////////////////////////////////////////");
-            Label("Digite o numero de uma dos opções acima: ");
-            menuPrograma = input.nextInt();
-            
-            while (menuPrograma < 1 || menuPrograma > 4) {
-                Label("Digite uma das opções 1,2,3,4: ");
+        try{
+            while(menuPrograma != 5){
+                Label("////////////////////Escolha uma opção////////////////////////");
+                Label("1. Inserir novo Produto");
+                Label("2. Remover Produto");
+                Label("3. Buscar Produto por codigo");
+                Label("4. Buscar Produtos pelo nome");
+                Label("5. Sair da aplicação");
+                Label("////////////////////////////////////////////");
+                Label("Digite o numero de uma dos opções acima: ");
                 menuPrograma = input.nextInt();
+
+                while (menuPrograma < 1 || menuPrograma > 5) {
+                    Label("Digite uma das opções 1,2,3,4: ");
+                    menuPrograma = input.nextInt();
+                }
+
+                Scanner scan;
+                
+                if(menuPrograma == 1){
+                    Produto p = new Produto();
+
+                    try{
+                        Label("Código do produto: ");
+                        scan = new Scanner(System.in);
+                        p.setCodigo(scan.nextInt());
+
+                        Label("Nome do produto: ");
+                        scan = new Scanner(System.in);
+                        p.setNome(scan.nextLine().trim());
+
+                        if(p.isProduto())
+                            storage.Add(p.getNome(), String.valueOf(p.getCodigo()));
+                        else
+                            throw new Exception("Por favor informe corretamente o nome e o codigo do produto.");
+                    }catch(Exception e){
+                        Err(e.getMessage());
+                    }
+                }else if(menuPrograma == 2){
+                    Label("Código do produto que deseja remover: ");
+                    scan = new Scanner(System.in);
+
+                    storage.Del(scan.nextInt());
+                }else if(menuPrograma == 3){
+                    Label("Digite o codigo do produto que deseja pesquisar: ");
+                    scan = new Scanner(System.in);
+                    
+                    String item = storage.Search(scan.nextInt());
+                    if(item != null){
+                        Label("Produto encontrado: " + item.replace(storage.DelimiterFileChar, "(") + ")");
+                    }
+                }else if(menuPrograma == 4){
+                    Label("Digite o codigo do produto que deseja pesquisar: ");
+                    scan = new Scanner(System.in);
+                    String term = scan.nextLine().trim();
+                    ArrayList<String> lista;
+                    if(term.toLowerCase().equals("all"))
+                        lista = storage.Search();
+                    else
+                        lista = storage.Search(term);
+                    for(String i : lista){
+                        Label(i.replace(storage.DelimiterFileChar, "(") + ")");
+                    }
+                }else if(menuPrograma == 5){
+                    System.exit(0);
+                }
             }
-            
-            if(menuPrograma == 1){
-                Scanner produto;
-                Produto p = new Produto();
-                
-                Label("Código do produto: ");
-                produto = new Scanner(System.in);
-                p.setCodigo(produto.nextInt());
-                
-                Label("Nome do produto: ");
-                produto = new Scanner(System.in);
-                p.setNome(produto.nextLine());
-                
-                storage.Add(p);
-            }
-            
+        }catch(InputMismatchException e){
+            Err("Valor fornecido é diferente do esperado.");
+            main(args);
         }
         
     }
@@ -60,4 +103,8 @@ public class ControleEstoque {
         System.out.println(txt);
     }
     
+    // para simplificar o uso do system.out.print em Strings
+    private static void Err(String txt){
+        System.err.println(txt);
+    }
 }

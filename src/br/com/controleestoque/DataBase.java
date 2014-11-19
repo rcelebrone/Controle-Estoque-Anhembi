@@ -8,46 +8,230 @@
 
 package br.com.controleestoque;
 
+import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  *
- * @author Rodrigo Celebrone
+ * @author Rodrigo CelebReaderone
  */
 public class DataBase {
-    
-    private String Nome;
-    
-    private static String DataBaseFileName = "storage.txt";
 
-    public String getNome() {
-        return Nome;
+    private static final String DataBaseFileName = "storage.txt";
+    public String DelimiterFileChar = "¬";
+
+    private static void Err(String txt){
+        System.err.println(txt);
     }
+    
+    public boolean Del(int codigo) {
+        File originFile;
+        BufferedReader bReader;
+        PrintWriter pWriter;
+        try {
+            originFile = new File(DataBaseFileName);
 
-    public void setNome(String Nome) {
-        this.Nome = Nome;
-    }
+            if (!originFile.exists()) {
+                Err("Database file não existe");
+                return false;
+            }
 
-    public boolean Add(Produto p){
-        PrintWriter writer;
-        try{
-            writer = new PrintWriter(DataBaseFileName, "UTF-8");
-            writer.println(p.getNome() + ";" + p.getCodigo());
-            writer.close();
-        }catch(IOException e){
+            //arquivo temporario
+            File tempFile = new File(originFile.getAbsolutePath() + ".tmp");
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+            pWriter = new PrintWriter(new FileWriter(tempFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {       
+                if (!line.trim().endsWith(DelimiterFileChar + codigo)) {
+                    pWriter.println(line);
+                    pWriter.flush();
+                }
+            }
+            pWriter.close();
+            bReader.close();
+
+            //Delete the original file
+            if (!originFile.delete()) {
+                Err("Não é possivel deletar o arquivo");
+                return false;
+            } 
+
+            //renomeia o arquivo temporario para o original
+            if (!tempFile.renameTo(originFile)){
+                Err("Não foi possivel renomear o arquivo temporario");
+                return false;
+            }
+        }catch (FileNotFoundException e) {
+            Err(e.getMessage());
+            return false;
+        }
+        catch (IOException e) {
             Err(e.getMessage());
             return false;
         }
         return true;
     }
     
-    public boolean Del(Produto p) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean Add(String name, String value) {
+        File originFile;
+        BufferedReader bReader;
+        PrintWriter pWriter;
+        try {
+            originFile = new File(DataBaseFileName);
+
+            if (!originFile.exists()) {
+              originFile.createNewFile();
+            }
+
+            //arquivo temporario
+            File tempFile = new File(originFile.getAbsolutePath() + ".tmp");
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+            pWriter = new PrintWriter(new FileWriter(tempFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {       
+                pWriter.println(line);
+                pWriter.flush();
+            }
+            
+            //escreve a nova linha
+            pWriter.println(name + DelimiterFileChar + value);
+            pWriter.flush();
+            
+            //finaliza
+            pWriter.close();
+            bReader.close();
+
+            //Delete the original file
+            if (!originFile.delete()) {
+                Err("Não é possivel deletar o arquivo");
+                return false;
+            } 
+
+            //renomeia o arquivo temporario para o original
+            if (!tempFile.renameTo(originFile)){
+                Err("Não foi possivel renomear o arquivo temporario");
+                return false;
+            }
+        }catch (FileNotFoundException e) {
+            Err(e.getMessage());
+            return false;
+        }
+        catch (IOException e) {
+            Err(e.getMessage());
+            return false;
+        }
+        return true;
     }
     
-    private static void Err(String txt){
-        System.err.println(txt);
+    public ArrayList<String> Search() {
+        File originFile;
+        BufferedReader bReader;
+        ArrayList aList;
+        try {
+            originFile = new File(DataBaseFileName);
+            aList = new ArrayList();
+
+            if (!originFile.exists()) {
+                Err("Database file não existe");
+                return null;
+            }
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {
+                aList.add(line);
+            }
+
+            //finaliza
+            bReader.close();
+        }catch (IOException e) {
+            Err(e.getMessage());
+            return null;
+        }
+        return aList;
     }
     
+    public String Search(int codigo) {
+        File originFile;
+        BufferedReader bReader;
+        String sFound = null;
+        try {
+            originFile = new File(DataBaseFileName);
+
+            if (!originFile.exists()) {
+                Err("Database file não existe");
+                return null;
+            }
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {
+                if(line.endsWith(DelimiterFileChar+String.valueOf(codigo))){
+                    sFound = line;
+                }
+            }
+
+            //finaliza
+            bReader.close();
+        }catch (IOException e) {
+            Err(e.getMessage());
+            return null;
+        }
+        return sFound;
+    }
+    
+    public ArrayList<String> Search(String name) {
+        File originFile;
+        BufferedReader bReader;
+        ArrayList aList;
+        try {
+            originFile = new File(DataBaseFileName);
+            aList = new ArrayList();
+
+            if (!originFile.exists()) {
+                Err("Database file não existe");
+                return null;
+            }
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {
+                if(line.startsWith(name+DelimiterFileChar)){
+                    aList.add(line);
+                }
+            }
+
+            //finaliza
+            bReader.close();
+        }catch (IOException e) {
+            Err(e.getMessage());
+            return null;
+        }
+        return aList;
+    }
 }

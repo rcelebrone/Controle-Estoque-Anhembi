@@ -29,4 +29,8 @@ public class Produto {
         return Codigo;
     }
     
+    public boolean isProduto(){
+        return (this.Nome.length() > 0 && this.Codigo > 0); 
+    }
+    
 }
