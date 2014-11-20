@@ -8,9 +8,7 @@
 
 package br.com.controleestoque;
 
-import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -53,10 +51,16 @@ public class DataBase {
 
             //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
             String line;
-            while ((line = bReader.readLine()) != null) {       
+            while ((line = bReader.readLine()) != null) {
                 if (!line.trim().endsWith(DelimiterFileChar + codigo)) {
                     pWriter.println(line);
                     pWriter.flush();
+                }else{
+                    String nome = line.trim().replace(DelimiterFileChar + codigo, "");
+                    int total = this.Count(nome);
+                    if(total <= 5){
+                        System.err.println("Existem apenas " + total + " produtos \"" + nome +"\" no estoque");
+                    }
                 }
             }
             pWriter.close();
@@ -233,5 +237,37 @@ public class DataBase {
             return null;
         }
         return aList;
+    }
+
+    public int Count(String name){
+        File originFile;
+        BufferedReader bReader;
+        int iTotal = 0;
+        try {
+            originFile = new File(DataBaseFileName);
+
+            if (!originFile.exists()) {
+                Err("Database file não existe");
+                return 0;
+            }
+
+            //carrega o arquivo principal e abre um pWriter para o temp
+            bReader = new BufferedReader(new FileReader(originFile));
+
+            //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
+            String line;
+            while ((line = bReader.readLine()) != null) {
+                if(line.startsWith(name+DelimiterFileChar)){
+                    iTotal++;
+                }
+            }
+
+            //finaliza
+            bReader.close();
+        }catch (IOException e) {
+            Err(e.getMessage());
+            return 0;
+        }
+        return iTotal;
     }
 }

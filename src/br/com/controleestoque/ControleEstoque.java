@@ -8,7 +8,6 @@
 
 package br.com.controleestoque;
 
-import static java.lang.System.in;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
