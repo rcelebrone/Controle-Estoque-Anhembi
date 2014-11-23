@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -59,7 +61,12 @@ public class DataBase {
                     String nome = line.trim().replace(DelimiterFileChar + codigo, "");
                     int total = this.Count(nome);
                     if(total <= 5){
-                        System.err.println("Existem apenas " + total + " produtos \"" + nome +"\" no estoque");
+                        if(total == 1)
+                            Err("Não existe ou acabaram os produtos \"" + nome +"\" no estoque");    
+                        else if(total == 2)
+                            Err("Existe apenas 1 produto \"" + nome +"\" no estoque");
+                        else
+                            Err("Existem apenas " + (total-1) + " produtos \"" + nome +"\" no estoque");
                     }
                 }
             }
@@ -108,9 +115,16 @@ public class DataBase {
 
             //Faz a leitura do arquivo original e grava no temporario apenas o que vamos manter no arquivo
             String line;
-            while ((line = bReader.readLine()) != null) {       
-                pWriter.println(line);
-                pWriter.flush();
+            while ((line = bReader.readLine()) != null) {
+                if(Search(Integer.parseInt(value)) == null){
+                    pWriter.println(line);
+                    pWriter.flush();
+                }else{
+                    pWriter.flush();
+                    bReader.close();
+                    tempFile.delete();
+                    throw(new Exception("O Código \""+ value +"\" já foi atribuido a um produto. por favor, informe um codigo diferente."));
+                }
             }
             
             //escreve a nova linha
@@ -139,7 +153,11 @@ public class DataBase {
         catch (IOException e) {
             Err(e.getMessage());
             return false;
+        } catch (Exception e) {
+            Err(e.getMessage());
+            return false;
         }
+        System.out.println("Cadastrado com sucesso!");
         return true;
     }
     
@@ -196,7 +214,7 @@ public class DataBase {
                     sFound = line;
                 }
             }
-
+            
             //finaliza
             bReader.close();
         }catch (IOException e) {

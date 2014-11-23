@@ -46,11 +46,11 @@ public class ControleEstoque {
                     Produto p = new Produto();
 
                     try{
-                        Label("Código do produto: ");
+                        Label("Código do produto que deseja cadastrar: ");
                         scan = new Scanner(System.in);
                         p.setCodigo(scan.nextInt());
 
-                        Label("Nome do produto: ");
+                        Label("Nome do produto que deseja cadastrar: ");
                         scan = new Scanner(System.in);
                         p.setNome(scan.nextLine().trim());
 
@@ -69,13 +69,15 @@ public class ControleEstoque {
                 }else if(menuPrograma == 3){
                     Label("Digite o codigo do produto que deseja pesquisar: ");
                     scan = new Scanner(System.in);
-                    
-                    String item = storage.Search(scan.nextInt());
+                    int codigo = scan.nextInt();
+                    String item = storage.Search(codigo);
                     if(item != null){
                         Label("Produto encontrado: " + item.replace(storage.DelimiterFileChar, "(") + ")");
+                    }else{
+                        Err("Nenhum produto encontrado com o codigo: " + codigo);
                     }
                 }else if(menuPrograma == 4){
-                    Label("Digite o codigo do produto que deseja pesquisar: ");
+                    Label("Digite o nome do produto que deseja pesquisar: ");
                     scan = new Scanner(System.in);
                     String term = scan.nextLine().trim();
                     ArrayList<String> lista;
@@ -83,8 +85,12 @@ public class ControleEstoque {
                         lista = storage.Search();
                     else
                         lista = storage.Search(term);
-                    for(String i : lista){
-                        Label(i.replace(storage.DelimiterFileChar, "(") + ")");
+                    if(lista.isEmpty())
+                        Err("Nenhum produto encontrado com o termo: " + term);
+                    else{
+                        for(String i : lista){
+                            Label(i.replace(storage.DelimiterFileChar, "(") + ")");
+                        }
                     }
                 }else if(menuPrograma == 5){
                     System.exit(0);
@@ -104,6 +110,7 @@ public class ControleEstoque {
     
     // para simplificar o uso do system.out.print em Strings
     private static void Err(String txt){
+        System.out.println(" ");
         System.err.println(txt);
     }
 }
