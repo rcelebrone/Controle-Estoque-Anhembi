@@ -1,4 +1,5 @@
-ControleEstoque
-===============
+# Controle de Estoque
+Projeto interdisciplinar 3 
 
-PIM 3 anhembi
+## Objetivo
+Um projeto utilizando no curso de graduação em Gestão de TI na Anhembi Morumbi
